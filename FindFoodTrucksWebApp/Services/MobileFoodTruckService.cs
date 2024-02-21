@@ -31,7 +31,6 @@ namespace FindFoodTrucksWebApp.Services
                 var records = csv.GetRecords<MobileFoodFacilityPermitModel>();
                 mobileFoodFacilityPermits.AddRange(records);                 
             }
-            
 
             var filteredData = FilteringMobileFoodFacilityPermitModelByInputModel(inputModel, mobileFoodFacilityPermits);
             var resultData = new ResultModel<IEnumerable<MobileFoodFacilityPermitModel>>()
