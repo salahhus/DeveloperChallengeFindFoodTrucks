@@ -1,0 +1,88 @@
+﻿@model IEnumerable<FindFoodTrucksWebApp.Models.MobileFoodFacilityPermitModel>
+
+@{
+    ViewData["Title"] = "GetFilteredMobileFoodTruck";
+}
+
+<h1>Results:</h1>
+
+<div>
+    <a asp-action="Index">Return to form</a>
+</div>
+
+@{
+    int countRow = 0;
+}
+
+    <table class="table table-striped table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>
+                    Number
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.ApplicantName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.FacilityType)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.LocationDescription)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Address)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.FoodItems)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Latitude)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Longitude)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.DaysHours)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                {
+                    countRow++;
+                }
+                <tr>
+                    <td>
+                        @countRow
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ApplicantName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.FacilityType)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.LocationDescription)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Address)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.FoodItems)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Latitude)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Longitude)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.DaysHours)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+
