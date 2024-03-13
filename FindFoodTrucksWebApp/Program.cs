@@ -1,7 +1,17 @@
 using FindFoodTrucksWebApp.Interfaces;
 using FindFoodTrucksWebApp.Services;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .CreateLogger();
+
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(logger);
+builder.Logging.AddConsole();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

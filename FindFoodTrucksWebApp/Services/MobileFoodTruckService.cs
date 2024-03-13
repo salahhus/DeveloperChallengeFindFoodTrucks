@@ -3,16 +3,37 @@ using CsvHelper;
 using FindFoodTrucksWebApp.Interfaces;
 using FindFoodTrucksWebApp.Models;
 using System.Globalization;
-using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc;
 
 namespace FindFoodTrucksWebApp.Services
 {
     public class MobileFoodTruckService : IMobileFoodTruckService
     {
+        readonly ILogger<MobileFoodTruckService> _logger;
         readonly string  _filePath = Directory.GetCurrentDirectory();
-        List<MobileFoodFacilityPermitModel> mobileFoodFacilityPermits = new List<MobileFoodFacilityPermitModel>();
+        readonly IConfiguration _configuration;
+        List<MobileFoodFacilityPermitModel> _mobileFoodFacilityPermits = new List<MobileFoodFacilityPermitModel>();
+        public MobileFoodTruckService(ILogger<MobileFoodTruckService> logger, IConfiguration configuration)
+        {
+            this._logger = logger;
+            _logger = logger;
+            _configuration = configuration;
+            this.ReadAllDataFromCSVFile();
+        }
+
+        private void ReadAllDataFromCSVFile() 
+        {
+            var configuration = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = false,
+            };
+
+            using (var reader = new StreamReader(_filePath + this._configuration.GetSection("DataCSVFilePath").Value))
+            using (var csv = new CsvReader(reader, configuration))
+            {
+                var records = csv.GetRecords<MobileFoodFacilityPermitModel>();
+                this._mobileFoodFacilityPermits.AddRange(records);
+            }
+        }
 
         /// <summary>
         /// Serving for retriving all data from database
@@ -20,27 +41,23 @@ namespace FindFoodTrucksWebApp.Services
         /// <returns></returns>
         public ResultModel<IEnumerable<MobileFoodFacilityPermitModel>> GetMobileFoodFacilityPermitModelList(InputModel inputModel)
         {
-            var configuration = new CsvConfiguration(CultureInfo.InvariantCulture)
+            try
             {
-                HasHeaderRecord = false,
-            };
+                var filteredData = FilteringMobileFoodFacilityPermitModelByInputModel(inputModel, this._mobileFoodFacilityPermits);
+                var resultData = new ResultModel<IEnumerable<MobileFoodFacilityPermitModel>>()
+                {
+                    Data = filteredData,
+                    Errors = new List<Error>(),
+                    IsSuccess = true
+                };
 
-            using (var reader = new StreamReader(_filePath + @"/DataCSV/Mobile_Food_Facility_Permit.csv")) 
-            using (var csv = new CsvReader(reader, configuration))
-            {
-                var records = csv.GetRecords<MobileFoodFacilityPermitModel>();
-                mobileFoodFacilityPermits.AddRange(records);                 
+                return resultData;
             }
-
-            var filteredData = FilteringMobileFoodFacilityPermitModelByInputModel(inputModel, mobileFoodFacilityPermits);
-            var resultData = new ResultModel<IEnumerable<MobileFoodFacilityPermitModel>>()
+            catch (Exception ex)
             {
-                Data = filteredData,
-                Errors = new List<Error>(),
-                IsSuccess = true
-            };
-
-            return resultData;
+                this._logger.LogError($"ERROR : {ex}");
+                throw;
+            }
         }
 
         /// <summary>
@@ -74,12 +91,12 @@ namespace FindFoodTrucksWebApp.Services
 
             if (!inputModel.Longitude.StartsWith("-"))
             {
-                inputModel.Longitude += "-";
+                inputModel.Longitude = "-" + inputModel.Longitude;
             }
 
             var data = cleanDataList.Where(x => x.Latitude <= double.Parse(inputModel.Latitude) && x.Longitude >= double.Parse(inputModel.Longitude)).Where(x=>x.Latitude != 0 && x.Longitude != 0).OrderBy(x=>x.Latitude);
 
-            mobileFoodFacilityPermits = new List<MobileFoodFacilityPermitModel>();
+            var mobileFoodFacilityPermits = new List<MobileFoodFacilityPermitModel>();
             foreach (var item in data)
             {
                 var getCleanedData = filteredData.FirstOrDefault(x => x.Locationid == item.Locationid);
